@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 class Mysql_tunnel_server{
 	private $db, $link;
 	public $errors = array();
-	public $ips = array('127.0.0.1');
+	public $ips = array('127.0.0.1'); //Add here allowed ip
 
 	function __construct()
 	{
