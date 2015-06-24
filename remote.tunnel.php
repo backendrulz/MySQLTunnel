@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 class Mysql_tunnel_server{
 	private $db, $link;
 	public $errors = array();
-	public $ips = array('127.0.0.1');
+	public $ips = array('127.0.0.1'); //Add here allowed ip
 
 	function __construct()
 	{
@@ -50,20 +50,20 @@ class Mysql_tunnel_server{
 		$query = mysql_query($this->query, $this->link);
 
 		if($query)
-		{
+		{	
 			$num_rows = mysql_num_rows($query);
 
 			$result = array();
 			$result['num_rows'] = $num_rows;
 
 			if($num_rows > 1)
-			{
+			{	
 				while($row = mysql_fetch_object($query))
 				{
 					$result['result'][] = $row;
 				}
 
-			}else{
+			}else{				
 				$result['result'] = mysql_fetch_object($query);
 
 			}
@@ -73,7 +73,7 @@ class Mysql_tunnel_server{
 			mysql_free_result($query);
 		}
 		else
-		{
+		{			
 			$this->errors[] = mysql_error();
 			return false;
 		}
@@ -103,15 +103,17 @@ class Mysql_tunnel_server{
 
 	private function get_ip()
 	{
-		if(isset($_SERVER['HTTP_CLIENT_IP']))
+		if($_SERVER['HTTP_HOST'] == 'localhost' )
+		{
+			$ip = '127.0.0.1';
+		}
+		elseif(isset($_SERVER['HTTP_CLIENT_IP']))
 		{
 			$ip = $_SERVER['HTTP_CLIENT_IP'];
-
 		}
 		elseif(isset($_SERVER['HTTP_X_FORWARDED_FOR']))
 		{
 			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-
 		}
 		else
 		{
@@ -131,5 +133,6 @@ class Mysql_tunnel_server{
 }
 
 new Mysql_tunnel_server;
+
 
 /* end of file */
