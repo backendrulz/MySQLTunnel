@@ -24,4 +24,4 @@ The **$cfg** array consists of the following data:
   - **user**: username of remote mysql
   - **pass**: password of remote mysql
   - **db_name**: the database name to use
-
+  - **port**: port to connect to mysql database default is 3306
