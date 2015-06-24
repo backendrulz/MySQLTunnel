@@ -11,11 +11,9 @@ class Mysql_tunnel_server{
 	{
 		$input = file_get_contents('php://input');
 
-	#	if(!in_array($this->get_ip(), $this->ips) OR empty($input))
-		if(!in_array($this->get_ip(), $this->ips) )
+		if(!in_array($this->get_ip(), $this->ips) OR empty($input))
 		{
-		echo 'non trovato';
-		#	$this->show_404();
+			$this->show_404();
 		}
 
 		try{
