@@ -11,9 +11,11 @@ class Mysql_tunnel_server{
 	{
 		$input = file_get_contents('php://input');
 
-		if(!in_array($this->get_ip(), $this->ips) OR empty($input))
+	#	if(!in_array($this->get_ip(), $this->ips) OR empty($input))
+		if(!in_array($this->get_ip(), $this->ips) )
 		{
-			$this->show_404();
+		echo 'non trovato';
+		#	$this->show_404();
 		}
 
 		try{
@@ -50,20 +52,20 @@ class Mysql_tunnel_server{
 		$query = mysql_query($this->query, $this->link);
 
 		if($query)
-		{
+		{	
 			$num_rows = mysql_num_rows($query);
 
 			$result = array();
 			$result['num_rows'] = $num_rows;
 
 			if($num_rows > 1)
-			{
+			{	
 				while($row = mysql_fetch_object($query))
 				{
 					$result['result'][] = $row;
 				}
 
-			}else{
+			}else{				
 				$result['result'] = mysql_fetch_object($query);
 
 			}
@@ -73,7 +75,7 @@ class Mysql_tunnel_server{
 			mysql_free_result($query);
 		}
 		else
-		{
+		{			
 			$this->errors[] = mysql_error();
 			return false;
 		}
@@ -103,15 +105,17 @@ class Mysql_tunnel_server{
 
 	private function get_ip()
 	{
-		if(isset($_SERVER['HTTP_CLIENT_IP']))
+		if($_SERVER['HTTP_HOST'] == 'localhost' )
+		{
+			$ip = '127.0.0.1';
+		}
+		elseif(isset($_SERVER['HTTP_CLIENT_IP']))
 		{
 			$ip = $_SERVER['HTTP_CLIENT_IP'];
-
 		}
 		elseif(isset($_SERVER['HTTP_X_FORWARDED_FOR']))
 		{
 			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-
 		}
 		else
 		{
@@ -131,5 +135,6 @@ class Mysql_tunnel_server{
 }
 
 new Mysql_tunnel_server;
+
 
 /* end of file */
