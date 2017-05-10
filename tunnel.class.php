@@ -1,26 +1,23 @@
 <?php
-require 'curl.php';
 
-class Mysql_tunnel_client
+class MysqlTunnelClient
 {
 	public $url, $errors = array(), $num_rows = 0;
-	private $db_data, $curl, $result;
+	private $dbData, $result;
 
 	function __construct($cfg)
 	{
 		$this->url		= $cfg['tunnel_url'];
-		$this->db_data	= $cfg['db_data'];
-		$this->curl		= new Curl;
+		$this->dbData	= $cfg['db_data'];
 	}
 
-	private function send_query($query, $array = FALSE)
+	private function sendQuery($query, $array = FALSE)
 	{
 		$query = base64_encode($query);
 
-		$data = json_encode(array('db' => $this->db_data, 'query' => $query));
+		$data = json_encode(array('db' => $this->dbData, 'query' => $query));
 
-		$this->curl->referer = $this->url;
-		$link = $this->curl->post($this->url, $data);
+		$link = $this->makeRequest($this->url, $data);
 
 		$this->result = json_decode($link->body, TRUE);
 		$this->num_rows = isset($this->result['num_rows']) ? $this->result['num_rows'] : 0;
@@ -36,17 +33,8 @@ class Mysql_tunnel_client
 
 	public function query($query)
 	{
-		$this->send_query($query, TRUE);
+		$this->sendQuery($query, TRUE);
 		return $this;
-	}
-
-	private function errors()
-	{
-		foreach($this->result['errors'] as $error)
-		{
-			echo $error."\n<br />";
-		}
-		die;
 	}
 
 	public function get($table_name, $limit = NULL, $offset = NULL)
@@ -67,7 +55,7 @@ class Mysql_tunnel_client
 			$sql .= ' LIMIT '.$offset.$limit;
 		}
 
-		return $this->send_query($sql, TRUE);
+		return $this->sendQuery($sql, TRUE);
 
 	}
 
@@ -113,6 +101,26 @@ class Mysql_tunnel_client
 
 		return $sql;
 	}
+
+    private function errors()
+	{
+		foreach($this->result['errors'] as $error)
+		{
+			echo $error."\n<br />";
+		}
+		die;
+	}
+
+    private function makeRequest($url, $data)
+    {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                                                                                                                             
+        return curl_exec($ch);
+
+    }
 
 }
 

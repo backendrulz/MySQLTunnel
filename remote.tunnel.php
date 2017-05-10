@@ -1,8 +1,7 @@
 <?php
-error_reporting(E_ALL);
-//~ error_reporting(0);
+error_reporting(0);
 
-class Mysql_tunnel_server{
+class MysqlTunnelServer{
 	private $db, $link;
 	public $errors = array();
 	public $ips = array('127.0.0.1'); //Add here allowed ip
@@ -31,50 +30,46 @@ class Mysql_tunnel_server{
 
 	private function tunnel_connect()
 	{
-		$this->link = mysql_connect($this->db->host.':'.$this->db->port, $this->db->user, $this->db->pass);
-		if(!$this->link)
-		{
-			$this->errors[] = mysql_error();
-			return false;
-		}
+		$this->link = new mysqli($this->db->host, $this->db->user, $this->db->pass, $this->db->db_name, $this->db->port);
 
-		if(strlen($this->db->db_name) != 0)
-		{
-			mysql_select_db($this->db->db_name);
+		if ($this->link->connect_error) {
+
+			$this->errors[] = $this->link->connect_errno . ' - '. $this->link->connect_error;
+			return false;
 		}
 
 	}
 
 	private function do_query()
 	{
-		$query = mysql_query($this->query, $this->link);
+		$query = $this->link->query($this->query, $this->link);
 
 		if($query)
-		{	
-			$num_rows = mysql_num_rows($query);
+		{
+			$num_rows = $this->link->num_rows($query);
 
 			$result = array();
 			$result['num_rows'] = $num_rows;
 
 			if($num_rows > 1)
-			{	
-				while($row = mysql_fetch_object($query))
+			{
+				while($row = $this->link->fetch_object($query))
 				{
 					$result['result'][] = $row;
 				}
 
-			}else{				
-				$result['result'] = mysql_fetch_object($query);
+			}else{
+				$result['result'] = $this->link->fetch_object($query);
 
 			}
+            $row->close();
 
 			return json_encode($result);
 
-			mysql_free_result($query);
 		}
 		else
-		{			
-			$this->errors[] = mysql_error();
+		{
+			$this->errors[] = $this->link->error();
 			return false;
 		}
 
@@ -132,7 +127,4 @@ class Mysql_tunnel_server{
 
 }
 
-new Mysql_tunnel_server;
-
-
-/* end of file */
+new MysqlTunnelServer;
