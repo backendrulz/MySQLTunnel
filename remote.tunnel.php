@@ -42,34 +42,34 @@ class MysqlTunnelServer{
 
 	private function do_query()
 	{
-		$query = $this->link->query($this->query, $this->link);
+		$result = $this->link->query($this->query);
 
-		if($query)
+		if($result)
 		{
-			$num_rows = $this->link->num_rows($query);
+			$num_rows = $result->num_rows;
 
-			$result = array();
-			$result['num_rows'] = $num_rows;
+			$new_result = array();
+			$new_result['num_rows'] = $num_rows;
 
 			if($num_rows > 1)
 			{
-				while($row = $this->link->fetch_object($query))
+				while($row = $result->fetch_object())
 				{
-					$result['result'][] = $row;
+					$new_result['result'][] = $row;
 				}
 
 			}else{
-				$result['result'] = $this->link->fetch_object($query);
+				$new_result['result'] = $result->fetch_object();
 
 			}
-            $row->close();
+            $result->close();
 
-			return json_encode($result);
+			return json_encode($new_result);
 
 		}
 		else
 		{
-			$this->errors[] = $this->link->error();
+			$this->errors[] = $this->link->error;
 			return false;
 		}
 

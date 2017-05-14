@@ -19,7 +19,7 @@ class MysqlTunnelClient
 
 		$link = $this->makeRequest($this->url, $data);
 
-		$this->result = json_decode($link->body, TRUE);
+		$this->result = json_decode($link, TRUE);
 		$this->num_rows = isset($this->result['num_rows']) ? $this->result['num_rows'] : 0;
 
 		if(isset($this->result['errors']))
@@ -114,10 +114,13 @@ class MysqlTunnelClient
     private function makeRequest($url, $data)
     {
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+		curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                                                                                                                             
+		// curl_setopt($ch, CURLOPT_VERBOSE, true);
+
         return curl_exec($ch);
 
     }
